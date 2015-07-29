@@ -29,9 +29,8 @@
 
 namespace mbgl {
 
-MapContext::MapContext(View& view_, FileSource& fileSource, MapData& data_)
-    : view(view_),
-      data(data_),
+MapContext::MapContext(FileSource& fileSource, MapData& data_)
+    : data(data_),
       updated(static_cast<UpdateType>(Update::Nothing)),
       asyncUpdate(std::make_unique<uv::async>(util::RunLoop::getLoop(), [this] { update(); })),
       texturePool(std::make_unique<TexturePool>()) {
@@ -41,8 +40,6 @@ MapContext::MapContext(View& view_, FileSource& fileSource, MapData& data_)
     util::ThreadContext::setGLObjectStore(&glObjectStore);
 
     asyncUpdate->unref();
-
-    view.activate();
 }
 
 MapContext::~MapContext() {
@@ -50,8 +47,15 @@ MapContext::~MapContext() {
     assert(!style);
 }
 
+void MapContext::setView(View* view_) {
+    assert(util::ThreadContext::currentlyOn(util::ThreadType::Map));
+
+    view = view_;
+    view->activate();
+}
+
 void MapContext::cleanup() {
-    view.notify();
+    view->notify();
 
     if (styleRequest) {
         FileSource* fs = util::ThreadContext::getFileSource();
@@ -67,19 +71,19 @@ void MapContext::cleanup() {
 
     glObjectStore.performCleanup();
 
-    view.deactivate();
+    view->deactivate();
 }
 
 void MapContext::pause() {
     MBGL_CHECK_ERROR(glFinish());
 
-    view.deactivate();
+    view->deactivate();
 
     std::unique_lock<std::mutex> lockPause(data.mutexPause);
     data.condPaused.notify_all();
     data.condResume.wait(lockPause);
 
-    view.activate();
+    view->activate();
 }
 
 void MapContext::triggerUpdate(const TransformState& state, const Update u) {
@@ -266,7 +270,7 @@ void MapContext::update() {
         style->update(transformState, *texturePool);
 
         if (data.mode == MapMode::Continuous) {
-            view.invalidate();
+            view->invalidate();
         } else if (callback && style->isLoaded()) {
             renderSync(transformState, frameData);
         }
@@ -331,11 +335,11 @@ MapContext::RenderResult MapContext::renderSync(const TransformState& state, con
     painter->render(*style, transformState, frame, data.getAnimationTime());
 
     if (data.mode == MapMode::Still) {
-        callback(nullptr, view.readStillImage());
+        callback(nullptr, view->readStillImage());
         callback = nullptr;
     }
 
-    view.swap();
+    view->swap();
 
     return RenderResult {
         style->isLoaded(),
@@ -365,7 +369,7 @@ void MapContext::setSourceTileCacheSize(size_t size) {
         for (const auto &source : style->sources) {
             source->setCacheSize(sourceCacheSize);
         }
-        view.invalidate();
+        view->invalidate();
     }
 }
 
@@ -375,7 +379,7 @@ void MapContext::onLowMemory() {
     for (const auto &source : style->sources) {
         source->onLowMemory();
     }
-    view.invalidate();
+    view->invalidate();
 }
 
 void MapContext::setSprite(const std::string& name, std::shared_ptr<const SpriteImage> sprite) {

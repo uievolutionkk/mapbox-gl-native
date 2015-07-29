@@ -30,8 +30,10 @@ struct LatLngBounds;
 
 class MapContext : public Style::Observer {
 public:
-    MapContext(uv_loop_t*, View&, FileSource&, MapData&);
+    MapContext(uv_loop_t*, FileSource&, MapData&);
     ~MapContext();
+
+    void setView(View*);
 
     void pause();
 
@@ -70,7 +72,7 @@ private:
     // Loads the actual JSON object an creates a new Style object.
     void loadStyleJSON(const std::string& json, const std::string& base);
 
-    View& view;
+    View* view;
     MapData& data;
 
     util::GLObjectStore glObjectStore;

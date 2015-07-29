@@ -49,6 +49,8 @@ class Map : private util::noncopyable {
 public:
     explicit Map(View&, FileSource&,
                  MapMode mode = MapMode::Continuous);
+    explicit Map(FileSource&,
+                 MapMode mode = MapMode::Continuous);
     ~Map();
 
     // Pauses the render thread. The render thread will stop running but will not be terminated and will not lose state until resumed.
@@ -56,6 +58,9 @@ public:
 
     // Resumes a paused render thread
     void resume();
+
+    // Attaches a View to the Map
+    void setView(View*);
 
     // Register a callback that will get called (on the render thread) when all resources have
     // been loaded and a complete render occurs.
@@ -154,7 +159,8 @@ public:
     bool isFullyLoaded() const;
 
 private:
-    const std::unique_ptr<Transform> transform;
+    View* view;
+    std::unique_ptr<Transform> transform;
     const std::unique_ptr<MapData> data;
     const std::unique_ptr<util::Thread<MapContext>> context;
     bool paused = false;

@@ -26,9 +26,8 @@
 
 namespace mbgl {
 
-MapContext::MapContext(uv_loop_t* loop, View& view_, FileSource& fileSource, MapData& data_)
-    : view(view_),
-      data(data_),
+MapContext::MapContext(uv_loop_t* loop, FileSource& fileSource, MapData& data_)
+    : data(data_),
       updated(static_cast<UpdateType>(Update::Nothing)),
       asyncUpdate(std::make_unique<uv::async>(loop, [this] { update(); })),
       texturePool(std::make_unique<TexturePool>()) {
@@ -38,8 +37,6 @@ MapContext::MapContext(uv_loop_t* loop, View& view_, FileSource& fileSource, Map
     util::ThreadContext::setGLObjectStore(&glObjectStore);
 
     asyncUpdate->unref();
-
-    view.activate();
 }
 
 MapContext::~MapContext() {
@@ -47,8 +44,15 @@ MapContext::~MapContext() {
     assert(!style);
 }
 
+void MapContext::setView(View* view_) {
+    assert(util::ThreadContext::currentlyOn(util::ThreadType::Map));
+
+    view = view_;
+    view->activate();
+}
+
 void MapContext::cleanup() {
-    view.notify();
+    view->notify();
 
     // Explicit resets currently necessary because these abandon resources that need to be
     // cleaned up by glObjectStore.performCleanup();
@@ -58,23 +62,23 @@ void MapContext::cleanup() {
 
     glObjectStore.performCleanup();
 
-    view.deactivate();
+    view->deactivate();
 }
 
 void MapContext::pause() {
     MBGL_CHECK_ERROR(glFinish());
 
-    view.deactivate();
+    view->deactivate();
 
     std::unique_lock<std::mutex> lockPause(data.mutexPause);
     data.condPaused.notify_all();
     data.condResume.wait(lockPause);
 
-    view.activate();
+    view->activate();
 }
 
 void MapContext::resize(uint16_t width, uint16_t height, float ratio) {
-    view.resize(width, height, ratio);
+    view->resize(width, height, ratio);
 }
 
 void MapContext::triggerUpdate(const TransformState& state, const Update u) {
@@ -262,7 +266,7 @@ void MapContext::update() {
         if (callback) {
             renderSync(transformState);
         } else {
-            view.invalidate();
+            view->invalidate();
         }
     }
 
@@ -326,11 +330,11 @@ bool MapContext::renderSync(const TransformState& state) {
     painter->render(*style, transformState, data.getAnimationTime());
 
     if (data.mode == MapMode::Still) {
-        callback(nullptr, view.readStillImage());
+        callback(nullptr, view->readStillImage());
         callback = nullptr;
     }
 
-    view.swap();
+    view->swap();
 
     return style->hasTransitions();
 }
@@ -349,7 +353,7 @@ void MapContext::setSourceTileCacheSize(size_t size) {
         for (const auto &source : style->sources) {
             source->setCacheSize(sourceCacheSize);
         }
-        view.invalidate();
+        view->invalidate();
     }
 }
 
@@ -359,7 +363,7 @@ void MapContext::onLowMemory() {
     for (const auto &source : style->sources) {
         source->onLowMemory();
     }
-    view.invalidate();
+    view->invalidate();
 }
 
 void MapContext::onTileDataChanged() {

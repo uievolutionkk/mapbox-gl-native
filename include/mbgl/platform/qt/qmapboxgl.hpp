@@ -24,6 +24,7 @@ public:
     ~QMapboxGL();
 
     void setAccessToken(const QString &token);
+    void setCacheDatabase(const QString &path);
 
     void setStyleJSON(const QString &style);
     void setStyleURL(const QString &url);

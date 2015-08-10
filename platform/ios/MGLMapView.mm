@@ -1299,8 +1299,6 @@ std::chrono::steady_clock::duration secondsAsDuration(float duration)
         self.scale = _mbglMap->getScale();
 
         self.quickZoomStart = [quickZoom locationInView:quickZoom.view].y;
-
-        self.userTrackingMode = MGLUserTrackingModeNone;
     }
     else if (quickZoom.state == UIGestureRecognizerStateChanged)
     {
@@ -1597,7 +1595,10 @@ mbgl::LatLngBounds MGLLatLngBoundsFromCoordinateBounds(MGLCoordinateBounds coord
 {
     if ( ! animated && ! self.rotationAllowed) return;
 
-    self.userTrackingMode = MGLUserTrackingModeNone;
+    if (self.userTrackingMode == MGLUserTrackingModeFollowWithHeading)
+    {
+        self.userTrackingMode = MGLUserTrackingModeFollow;
+    }
 
     CGFloat duration = (animated ? MGLAnimationDuration : 0);
 

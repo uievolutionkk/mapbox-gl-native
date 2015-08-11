@@ -27,12 +27,12 @@ void Settings_NSUserDefaults::load()
     zoom      = [settings[@"zoom"]      doubleValue];
     bearing   = [settings[@"bearing"]   doubleValue];
     debug     = [settings[@"debug"]     boolValue];
-    
+
     unsigned uncheckedTrackingMode = [settings[@"trackingMode"] unsignedIntValue];
     if (uncheckedTrackingMode > MGLUserTrackingModeNone &&
         uncheckedTrackingMode <= MGLUserTrackingModeFollowWithHeading)
     {
-        userTrackingMode = (MGLUserTrackingMode)uncheckedTrackingMode;
+        userTrackingMode = static_cast<MGLUserTrackingMode>(uncheckedTrackingMode);
     }
     showsUserLocation = [settings[@"showsUserLocation"] boolValue];
 }

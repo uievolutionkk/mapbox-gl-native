@@ -46,7 +46,8 @@ void Painter::renderFill(FillBucket& bucket, const StyleLayer &layer_desc, const
     if (outline && pass == RenderPass::Translucent) {
         useProgram(outlineShader->program);
         outlineShader->u_matrix = vtxMatrix;
-        lineWidth(2.0f); // This is always fixed and does not depend on the pixelRatio!
+        lineWidth(properties.stroke_width);
+        //lineWidth(2.0f); // This is always fixed and does not depend on the pixelRatio!
 
         outlineShader->u_color = stroke_color;
 
@@ -122,7 +123,11 @@ void Painter::renderFill(FillBucket& bucket, const StyleLayer &layer_desc, const
     if (fringeline && pass == RenderPass::Translucent) {
         useProgram(outlineShader->program);
         outlineShader->u_matrix = vtxMatrix;
-        lineWidth(2.0f); // This is always fixed and does not depend on the pixelRatio!
+        lineWidth(properties.stroke_width);
+        //if(properties.stroke_width > 5.0) {
+            Log::Warning(Event::General, "stroke_width is %f", properties.stroke_width);
+        //}
+        //lineWidth(2.0f); // This is always fixed and does not depend on the pixelRatio!
 
         outlineShader->u_color = fill_color;
 

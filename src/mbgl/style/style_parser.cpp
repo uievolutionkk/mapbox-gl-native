@@ -448,6 +448,9 @@ StyleParser::Status StyleParser::parseOptionalProperty(const char *property_name
     if (!value.HasMember(property_name)) {
         return StyleParserFailure;
     } else {
+        if(strcmp(property_name, "fill-outline-width") == 0) {
+            Log::Warning(Event::ParseStyle, "fill-outline-width");//: '%d'", value.GetDouble());
+        }
         return setProperty<T>(replaceConstant(value[property_name]), property_name, key, klass);
     }
 }
@@ -799,6 +802,7 @@ void StyleParser::parsePaint(JSVal value, ClassProperties &klass) {
     parseOptionalProperty<Function<Color>>("fill-color", Key::FillColor, klass, value);
     parseOptionalProperty<PropertyTransition>("fill-color-transition", Key::FillColor, klass, value);
     parseOptionalProperty<Function<Color>>("fill-outline-color", Key::FillOutlineColor, klass, value);
+    parseOptionalProperty<Function<float>>("fill-outline-width", Key::FillOutlineWidth, klass, value);
     parseOptionalProperty<PropertyTransition>("fill-outline-color-transition", Key::FillOutlineColor, klass, value);
     parseOptionalProperty<Function<std::array<float, 2>>>("fill-translate", Key::FillTranslate, klass, value);
     parseOptionalProperty<PropertyTransition>("fill-translate-transition", Key::FillTranslate, klass, value);

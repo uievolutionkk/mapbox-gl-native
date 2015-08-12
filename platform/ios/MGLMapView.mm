@@ -1867,6 +1867,7 @@ CLLocationCoordinate2D MGLLocationCoordinate2DFromLatLng(mbgl::LatLng latLng)
                 mbgl::FillProperties fillProperties;
                 fillProperties.opacity = alpha;
                 fillProperties.stroke_color = strokeNativeColor;
+                fillProperties.stroke_width = 1.0f;
                 fillProperties.fill_color = fillNativeColor;
                 shapeProperties.set<mbgl::FillProperties>(fillProperties);
             }

@@ -181,6 +181,7 @@ void StyleLayer::applyStyleProperties<FillProperties>(const float z, const TimeP
     applyTransitionedStyleProperty(PropertyKey::FillOpacity, fill.opacity, z, now, zoomHistory);
     applyTransitionedStyleProperty(PropertyKey::FillColor, fill.fill_color, z, now, zoomHistory);
     applyTransitionedStyleProperty(PropertyKey::FillOutlineColor, fill.stroke_color, z, now, zoomHistory);
+    applyTransitionedStyleProperty(PropertyKey::FillOutlineWidth, fill.stroke_width, z, now, zoomHistory);
     applyTransitionedStyleProperty(PropertyKey::FillTranslate, fill.translate, z, now, zoomHistory);
     applyStyleProperty(PropertyKey::FillTranslateAnchor, fill.translateAnchor, z, now, zoomHistory);
     applyStyleProperty(PropertyKey::FillImage, fill.image, z, now, zoomHistory);

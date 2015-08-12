@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>MGLMapboxAccessToken</key>
+	<string>pk.eyJ1IjoiZmV6emlrMjEiLCJhIjoiNmQ5ZDBlMmY2MThmZjhkMzkzNzgzNjcxOTM4NzU4OWEifQ.mle5eVr3Gh47I_0KZHnwjw</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -40,7 +42,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>(c) 2014 Mapbox</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>The map will be centered on the user's location.</string>
+	<string>The map will be centered on the user&apos;s location.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Default</string>
 	<key>UIRequiredDeviceCapabilities</key>

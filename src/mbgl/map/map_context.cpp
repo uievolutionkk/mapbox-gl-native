@@ -210,6 +210,9 @@ void MapContext::updateAnnotationTiles(const std::unordered_set<TileID, TileID::
                 // stroke color
                 PropertyValue strokeColor = ConstantFunction<Color>(shapeStyle.get<FillProperties>().stroke_color);
                 paintProperties.set(PropertyKey::FillOutlineColor, strokeColor);
+                
+                PropertyValue strokeWidth = ConstantFunction<float>(shapeStyle.get<FillProperties>().stroke_width);
+                paintProperties.set(PropertyKey::FillOutlineWidth, strokeWidth);
             }
 
             std::map<ClassID, ClassProperties> shapePaints;

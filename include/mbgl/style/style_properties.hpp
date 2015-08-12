@@ -18,6 +18,7 @@ struct FillProperties {
     float opacity = 1.0f;
     Color fill_color = {{ 0, 0, 0, 1 }};
     Color stroke_color = {{ 0, 0, 0, -1 }};
+    float stroke_width = 2.0f;
     std::array<float, 2> translate = {{ 0, 0 }};
     TranslateAnchorType translateAnchor = TranslateAnchorType::Map;
     Faded<std::string> image;

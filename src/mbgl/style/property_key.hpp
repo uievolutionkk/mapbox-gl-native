@@ -8,6 +8,7 @@ enum class PropertyKey {
     FillOpacity,
     FillColor,
     FillOutlineColor,
+    FillOutlineWidth,
     FillTranslate, // for transitions only
     FillTranslateAnchor,
     FillImage,

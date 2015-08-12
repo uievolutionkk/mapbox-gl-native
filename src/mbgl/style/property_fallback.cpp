@@ -9,6 +9,7 @@ const std::map<PropertyKey, PropertyValue> PropertyFallbackValue::properties = {
     { PropertyKey::FillAntialias, defaultStyleProperties<FillProperties>().antialias },
     { PropertyKey::FillOpacity, defaultStyleProperties<FillProperties>().opacity },
     { PropertyKey::FillColor, defaultStyleProperties<FillProperties>().fill_color },
+    { PropertyKey::FillOutlineWidth, defaultStyleProperties<FillProperties>().stroke_width },
     // no FillOutlineColor on purpose.
     { PropertyKey::FillTranslate, defaultStyleProperties<FillProperties>().translate },
     { PropertyKey::FillTranslateAnchor, defaultStyleProperties<FillProperties>().translateAnchor },

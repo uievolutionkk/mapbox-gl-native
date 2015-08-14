@@ -87,21 +87,23 @@ mbgl::Settings_NSUserDefaults *settings = nullptr;
 {
     [super viewDidAppear:animated];
 
-    CLLocationCoordinate2D coordinates[] = {
-        CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172),
-        CLLocationCoordinate2DMake(37.6718643732763, -122.50099182128905),
-        CLLocationCoordinate2DMake(37.6718643732763, -122.39593505859376),
-        CLLocationCoordinate2DMake(37.71696084622755, -122.39490509033203),
-        CLLocationCoordinate2DMake(37.71886190199711, -122.46494293212889),
-        CLLocationCoordinate2DMake(37.79296501804014, -122.464599609375),
-        CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172)
-    };
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CLLocationCoordinate2D coordinates[] = {
+            CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172),
+            CLLocationCoordinate2DMake(37.6718643732763, -122.50099182128905),
+            CLLocationCoordinate2DMake(37.6718643732763, -122.39593505859376),
+            CLLocationCoordinate2DMake(37.71696084622755, -122.39490509033203),
+            CLLocationCoordinate2DMake(37.71886190199711, -122.46494293212889),
+            CLLocationCoordinate2DMake(37.79296501804014, -122.464599609375),
+            CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172)
+        };
 
-    MGLPolygon *shape = [MGLPolygon polygonWithCoordinates:coordinates count:7];
+        MGLPolygon *shape = [MGLPolygon polygonWithCoordinates:coordinates count:7];
 
-    [self.mapView addAnnotation:shape];
+        [self.mapView addAnnotation:shape];
 
-    [self.mapView showAnnotations:@[ shape ] animated:false];
+        [self.mapView showAnnotations:@[ shape ] animated:false];
+    });
 }
 
 - (void)saveState:(__unused NSNotification *)notification

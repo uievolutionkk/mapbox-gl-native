@@ -14,7 +14,8 @@
         './polyline.geojson',
         './threestates.geojson',
         './Settings.bundle/',
-        './app-info.plist'
+        './app-info.plist',
+        './plain-v7.json'
       ],
 
       'dependencies': [

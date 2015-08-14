@@ -83,25 +83,48 @@ mbgl::Settings_NSUserDefaults *settings = nullptr;
     self.mapView.styleURL = [NSURL URLWithString:@"asset://plain-v7.json"];
 }
 
+#define C(x, y) CLLocationCoordinate2DMake(y, x)
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
 
-    CLLocationCoordinate2D coordinates[] = {
-        CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172),
-        CLLocationCoordinate2DMake(37.6718643732763, -122.50099182128905),
-        CLLocationCoordinate2DMake(37.6718643732763, -122.39593505859376),
-        CLLocationCoordinate2DMake(37.71696084622755, -122.39490509033203),
-        CLLocationCoordinate2DMake(37.71886190199711, -122.46494293212889),
-        CLLocationCoordinate2DMake(37.79296501804014, -122.464599609375),
-        CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172)
-    };
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CLLocationCoordinate2D coordinates[] = {
+            C(-122.46562957763673, 37.72918106779786),
+            C(-122.48142242431642, 37.71668926284967),
+            C(-122.4539566040039, 37.72076290898373),
+            C(-122.45601654052734, 37.69197100839692),
+            C(-122.44709014892577, 37.686265625259175),
+            C(-122.44159698486328, 37.71967662525057),
+            C(-122.43473052978517, 37.6949593672454),
+            C(-122.431640625, 37.72483633111071),
+            C(-122.44674682617188, 37.74004179435127),
+            C(-122.46391296386719, 37.74302821484915),
+            C(-122.46562957763673, 37.72918106779786)
+            /*CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172),
+            CLLocationCoordinate2DMake(37.6718643732763, -122.50099182128905),
+            CLLocationCoordinate2DMake(37.6718643732763, -122.39593505859376),
+            CLLocationCoordinate2DMake(37.71696084622755, -122.39490509033203),
+            CLLocationCoordinate2DMake(37.71886190199711, -122.46494293212889),
+            CLLocationCoordinate2DMake(37.79296501804014, -122.464599609375),
+            CLLocationCoordinate2DMake(37.79296501804014, -122.49858856201172)*/
+        };
+        CLLocationCoordinate2D *bigCoordinates = (CLLocationCoordinate2D*)malloc(sizeof(CLLocationCoordinate2D) * 11 * 100);
+        for(int p = 0; p < 100; ++p) {
+            for (int q = 0; q < 11; ++q) {
+                bigCoordinates[p * 11 + q] = coordinates[q];
+                bigCoordinates[p * 11 + q].latitude += p * 0.01;
+                bigCoordinates[p * 11 + q].longitude += p * 0.01;
+            }
+        }
 
-    MGLPolygon *shape = [MGLPolygon polygonWithCoordinates:coordinates count:7];
 
-    [self.mapView addAnnotation:shape];
+        MGLPolygon *shape = [MGLPolygon polygonWithCoordinates:bigCoordinates count:1100];
 
-    [self.mapView showAnnotations:@[ shape ] animated:false];
+        [self.mapView addAnnotation:shape];
+
+        [self.mapView showAnnotations:@[ shape ] animated:false];
+    });
 }
 
 - (void)saveState:(__unused NSNotification *)notification

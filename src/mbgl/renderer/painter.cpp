@@ -125,10 +125,10 @@ void Painter::useProgram(uint32_t program) {
 }
 
 void Painter::lineWidth(float line_width) {
-    if (gl_lineWidth != line_width) {
+    //if (gl_lineWidth != line_width) {
         MBGL_CHECK_ERROR(glLineWidth(line_width));
         gl_lineWidth = line_width;
-    }
+    //}
 }
 
 void Painter::changeMatrix() {

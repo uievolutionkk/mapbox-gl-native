@@ -30,7 +30,9 @@ void FillBucket::free(void *, void *ptr) {
 
 FillBucket::FillBucket(FillVertexBuffer &vertexBuffer_,
                        TriangleElementsBuffer &triangleElementsBuffer_,
-                       LineElementsBuffer &lineElementsBuffer_)
+                       LineElementsBuffer &lineElementsBuffer_,
+                       FillVertexBuffer &newStyleLineVertexBuffer_,
+                       TriangleElementsBuffer &newStyleLineElementsBuffer_)
     : allocator(new TESSalloc{
           &alloc,
           &realloc,
@@ -47,9 +49,15 @@ FillBucket::FillBucket(FillVertexBuffer &vertexBuffer_,
       vertexBuffer(vertexBuffer_),
       triangleElementsBuffer(triangleElementsBuffer_),
       lineElementsBuffer(lineElementsBuffer_),
+      newStyleLineVertexBuffer(newStyleLineVertexBuffer_),
+      newStyleLineElementsBuffer(newStyleLineElementsBuffer_),
       vertex_start(vertexBuffer_.index()),
       triangle_elements_start(triangleElementsBuffer_.index()),
-      line_elements_start(lineElementsBuffer.index()) {
+      line_elements_start(lineElementsBuffer.index()),
+      new_style_line_vertex_start(newStyleLineVertexBuffer_.index()),
+      new_style_line_elements_start(newStyleLineElementsBuffer_.index()) {
+          //Log::Warning(Event::General, "new_style_line_vertex_start %d new_style_line_elements_start %d", new_style_line_vertex_start,
+                       //new_style_line_elements_start);
     assert(tesselator);
 }
 
@@ -77,6 +85,16 @@ void FillBucket::addGeometry(const GeometryCollection& geometryCollection) {
     tessellate();
 }
 
+#define LINE_WIDTH 25.0
+
+void norml(TESSreal *f1, TESSreal *f2) {
+    TESSreal length = sqrtf((*f1) * (*f1) + (*f2) * (*f2));
+    *f1 /= length;
+    *f2 /= length;
+    *f1 *= LINE_WIDTH;
+    *f2 *= LINE_WIDTH;
+}
+
 void FillBucket::tessellate() {
     if (!hasVertices) {
         return;
@@ -92,22 +110,29 @@ void FillBucket::tessellate() {
     }
 
     size_t total_vertex_count = 0;
+    size_t line_vertex_count = 0;
+    size_t line_index_count = 0;
     for (const auto& polygon : polygons) {
         total_vertex_count += polygon.size();
+        line_vertex_count += polygon.size() * 8;
+        line_index_count += polygon.size() * 4;
     }
 
-    if (total_vertex_count > 65536) {
+    if (line_vertex_count > 65536) {
         throw geometry_too_long_exception();
     }
 
-    if (lineGroups.empty() || (lineGroups.back()->vertex_length + total_vertex_count > 65535)) {
+    if (lineGroups.empty() || (lineGroups.back()->vertex_length + line_vertex_count > 65535) ||
+        (lineGroups.back()->elements_length + line_index_count > 65535)) {
         // Move to a new group because the old one can't hold the geometry.
         lineGroups.emplace_back(std::make_unique<LineGroup>());
     }
+    //Log::Warning(Event::General, "Current vertex_length %d line_vertex_count %d", lineGroups.back()->vertex_length, line_vertex_count);
+    
 
     assert(lineGroups.back());
     LineGroup& lineGroup = *lineGroups.back();
-    uint32_t lineIndex = lineGroup.vertex_length;
+    //uint32_t lineIndex = lineGroup.vertex_length;
 
     for (const auto& polygon : polygons) {
         const size_t group_count = polygon.size();
@@ -122,15 +147,95 @@ void FillBucket::tessellate() {
 
         for (size_t i = 0; i < group_count; i++) {
             const size_t prev_i = (i == 0 ? group_count : i) - 1;
-            lineElementsBuffer.add(lineIndex + prev_i, lineIndex + i);
+            //lineElementsBuffer.add(lineIndex + prev_i, lineIndex + i);
+            
+            //Look up vertex prev_i and i, then construct a polygon of width (it will be from the parent, for now hard code a number)
+            //by taking i - prev_i and turning it 90 degrees (which means btw (x,y) => (-y, x)), normalizing it and adding and removing it
+            //from both i and prev_i, then add 6 indices
+            
+            const size_t pprev_i = (prev_i == 0 ? group_count : prev_i) - 1;
+            const size_t n_i = (i == (group_count - 1) ? 0 : i) + 1;
+            TESSreal prevX = clipped_line.at(2 * (prev_i));
+            TESSreal prevY = clipped_line.at(2 * (prev_i) + 1);
+            TESSreal X = clipped_line.at(2 * (i));
+            TESSreal Y = clipped_line.at(2 *  (i) + 1);
+            TESSreal widthVectorX = -(Y - prevY);
+            TESSreal widthVectorY = (X - prevX);
+            norml(&widthVectorX, &widthVectorY);
+            size_t curIndex = newStyleLineVertexBuffer.index();
+            
+            Log::Warning(Event::General, "curIndex: %d, prevX: %5.2f prevY: %5.2f X: %5.2f Y: %5.2f",
+                         curIndex, prevX, prevY, X, Y);
+            newStyleLineVertexBuffer.add(prevX + widthVectorX, prevY + widthVectorY);
+            newStyleLineVertexBuffer.add(prevX - widthVectorX, prevY - widthVectorY);
+            newStyleLineVertexBuffer.add(X + widthVectorX, Y + widthVectorY);
+            newStyleLineVertexBuffer.add(X - widthVectorX, Y - widthVectorY);
+            newStyleLineElementsBuffer.add(curIndex, curIndex + 1, curIndex + 2);
+            newStyleLineElementsBuffer.add(curIndex + 1, curIndex + 3, curIndex + 2);
+            
+            
+            TESSreal pprevX = clipped_line.at(2 * pprev_i);
+            TESSreal pprevY = clipped_line.at(2 * pprev_i + 1);
+            
+            TESSreal V1X = (X - prevX);
+            TESSreal V1Y = (Y - prevY);
+            norml(&V1X, &V1Y);
+            TESSreal V2X = (pprevX - prevX);
+            TESSreal V2Y = (pprevY - prevY);
+            norml(&V2X, &V2Y);
+            
+            TESSreal bezelVectorX = -(V1X + V2X) / 2.0f;
+            TESSreal bezelVectorY = -(V1Y + V2Y) / 2.0f;
+            norml(&bezelVectorX, &bezelVectorY);
+            
+            newStyleLineVertexBuffer.add(prevX + bezelVectorX, prevY + bezelVectorY);
+            newStyleLineVertexBuffer.add(prevX, prevY);
+            
+            //curIndex adds in widthVector, curIndex + 1 subtracts it.  Meanwhile index 4 goes in the
+            //direction of bezelVector.  We want to go first to the end point, then out to the bezel point,
+            //we want to go to whichever point is in that same direction from the end point.  So if the
+            //bezelVector and the widthVector point in the same direction, we go to curIndex, otherwise we
+            //go the other way.
+            if ((widthVectorX * bezelVectorX + widthVectorY * bezelVectorY) > 0.0f) {
+                //Log::Warning(Event::General, "widthVector [%5.2f, %5.2f] bezelVector [%5.2f, %5.2f]", widthVectorX, widthVectorY, bezelVectorX, bezelVectorY);
+                newStyleLineElementsBuffer.add(curIndex + 5, curIndex + 4, curIndex);
+            } else {
+                newStyleLineElementsBuffer.add(curIndex + 5, curIndex + 4, curIndex + 1);
+            }
+            
+            TESSreal nX = clipped_line.at(2 * n_i);
+            TESSreal nY = clipped_line.at(2 * n_i + 1);
+            
+            V1X = (nX - X);
+            V1Y = (nY - Y);
+            norml(&V1X, &V1Y);
+            V2X = (prevX - X);
+            V2Y = (prevY - Y);
+            norml(&V2X, &V2Y);
+
+            bezelVectorX = -(V1X + V2X) / 2.0f;
+            bezelVectorY = -(V1Y + V2Y) / 2.0f;
+            norml(&bezelVectorX, &bezelVectorY);
+            newStyleLineVertexBuffer.add(X + bezelVectorX, Y + bezelVectorY);
+            newStyleLineVertexBuffer.add(X, Y);
+            
+            if ((widthVectorX * bezelVectorX + widthVectorY * bezelVectorY) > 0.0f) {
+            //if ((widthVectorX * bezelVectorY + widthVectorY * bezelVectorX) > 0.0f) {
+            //if ((widthVectorX * bezelVectorX - widthVectorY * bezelVectorY) > 0.0f) {
+            //if (i == 0) {
+                    newStyleLineElementsBuffer.add(curIndex + 7, curIndex + 6, curIndex + 2);
+            } else {
+                newStyleLineElementsBuffer.add(curIndex + 7, curIndex + 6, curIndex + 3);
+            }
+            //newStyleLineElementsBuffer.add(curIndex, curIndex, curIndex);
         }
 
-        lineIndex += group_count;
+        //lineIndex += group_count;
 
         tessAddContour(tesselator, vertexSize, clipped_line.data(), stride, (int)clipped_line.size() / vertexSize);
     }
 
-    lineGroup.elements_length += total_vertex_count;
+    lineGroup.elements_length += line_index_count;
 
     if (tessTesselate(tesselator, TESS_WINDING_ODD, TESS_POLYGONS, vertices_per_group, vertexSize, 0)) {
         const TESSreal *vertices = tessGetVertices(tesselator);
@@ -189,16 +294,19 @@ void FillBucket::tessellate() {
 #endif
     }
 
+    //This is no longer true:
     // We're adding the total vertex count *after* we added additional vertices
     // in the tessellation step. They won't be part of the actual lines, but
     // we need to skip over them anyway if we draw the next group.
-    lineGroup.vertex_length += total_vertex_count;
+    lineGroup.vertex_length += line_vertex_count;
 }
 
 void FillBucket::upload() {
     vertexBuffer.upload();
     triangleElementsBuffer.upload();
-    lineElementsBuffer.upload();
+    //lineElementsBuffer.upload();
+    newStyleLineVertexBuffer.upload();
+    newStyleLineElementsBuffer.upload();
 
     // From now on, we're going to render during the opaque and translucent pass.
     uploaded = true;
@@ -240,7 +348,7 @@ void FillBucket::drawElements(PatternShader& shader) {
 }
 
 void FillBucket::drawVertices(OutlineShader& shader) {
-    char *vertex_index = BUFFER_OFFSET(vertex_start * vertexBuffer.itemSize);
+    /*char *vertex_index = BUFFER_OFFSET(vertex_start * vertexBuffer.itemSize);
     char *elements_index = BUFFER_OFFSET(line_elements_start * lineElementsBuffer.itemSize);
     for (auto& group : lineGroups) {
         assert(group);
@@ -248,5 +356,19 @@ void FillBucket::drawVertices(OutlineShader& shader) {
         MBGL_CHECK_ERROR(glDrawElements(GL_LINES, group->elements_length * 2, GL_UNSIGNED_SHORT, elements_index));
         vertex_index += group->vertex_length * vertexBuffer.itemSize;
         elements_index += group->elements_length * lineElementsBuffer.itemSize;
+    }*/
+    //elements_length is the number of triangles in the elements buffer => that * 3 is the number of indices, or * 6 is the
+    //number of bytes.
+    //vertex_length is the number of vertices in the vertices buffer => that * 12 is the number of bytes
+    char *vertex_index = BUFFER_OFFSET(new_style_line_vertex_start * newStyleLineVertexBuffer.itemSize);
+    char *elements_index = BUFFER_OFFSET(new_style_line_elements_start * newStyleLineElementsBuffer.itemSize);
+    for (auto& group : lineGroups) {
+        assert(group);
+        //Log::Warning(Event::General, "Binding with vertex_index %d and elements_index %d and elements_length %d", vertex_index, elements_index, group->elements_length);
+        group->array[0].bind(shader, newStyleLineVertexBuffer, newStyleLineElementsBuffer, vertex_index);
+        if ((((unsigned long)elements_index) + (group->elements_length * 16)) < 65536)
+            MBGL_CHECK_ERROR(glDrawElements(GL_TRIANGLES, group->elements_length * 3, GL_UNSIGNED_SHORT, elements_index));
+        vertex_index += group->vertex_length * newStyleLineVertexBuffer.itemSize;
+        elements_index += group->elements_length * newStyleLineElementsBuffer.itemSize;
     }
 }

@@ -181,7 +181,9 @@ std::unique_ptr<Bucket> TileWorker::createFillBucket(const GeometryTileLayer& la
                                                      const StyleBucket& bucket_desc) {
     auto bucket = std::make_unique<FillBucket>(fillVertexBuffer,
                                                 triangleElementsBuffer,
-                                                lineElementsBuffer);
+                                                lineElementsBuffer,
+                                                newStyleLineVertexBuffer,
+                                                newStyleLineElementsBuffer);
     addBucketGeometries(bucket, layer, bucket_desc.filter);
     return bucket->hasData() ? std::move(bucket) : nullptr;
 }

@@ -30,7 +30,9 @@ class FillBucket : public Bucket {
 public:
     FillBucket(FillVertexBuffer &vertexBuffer,
                TriangleElementsBuffer &triangleElementsBuffer,
-               LineElementsBuffer &lineElementsBuffer);
+               LineElementsBuffer &lineElementsBuffer,
+               FillVertexBuffer &newStyleLineVertexBuffer,
+               TriangleElementsBuffer &newStyleLineElementsBuffer);
     ~FillBucket() override;
 
     void upload() override;
@@ -52,11 +54,16 @@ private:
     FillVertexBuffer& vertexBuffer;
     TriangleElementsBuffer& triangleElementsBuffer;
     LineElementsBuffer& lineElementsBuffer;
+    
+    FillVertexBuffer& newStyleLineVertexBuffer;
+    TriangleElementsBuffer& newStyleLineElementsBuffer;
 
     // hold information on where the vertices are located in the FillBuffer
     const size_t vertex_start;
     const size_t triangle_elements_start;
     const size_t line_elements_start;
+    const size_t new_style_line_vertex_start;
+    const size_t new_style_line_elements_start;
 
     std::vector<std::unique_ptr<TriangleGroup>> triangleGroups;
     std::vector<std::unique_ptr<LineGroup>> lineGroups;

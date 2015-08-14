@@ -71,6 +71,9 @@ private:
 
     TriangleElementsBuffer triangleElementsBuffer;
     LineElementsBuffer lineElementsBuffer;
+    
+    FillVertexBuffer newStyleLineVertexBuffer;
+    TriangleElementsBuffer newStyleLineElementsBuffer;
 
     std::unique_ptr<CollisionTile> collision;
 

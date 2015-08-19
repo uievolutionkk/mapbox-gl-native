@@ -50,7 +50,7 @@ Target OS X: 10.9+
 
 #### CocoaPods
 
-[CocoaPods](https://cocoapods.org) is preferred. Put the following in your `Podfile`:
+The preferred way to install Mapbox GL is via [CocoaPods](https://cocoapods.org). (Version 0.38.0 or above is required.) Put the following in your `Podfile`:
 
 ```ruby
 use_frameworks!

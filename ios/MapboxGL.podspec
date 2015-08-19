@@ -29,7 +29,7 @@ Pod::Spec.new do |m|
 
   m.frameworks = 'CoreLocation', 'CoreTelephony', 'GLKit', 'ImageIO', 'MobileCoreServices', 'QuartzCore', 'SystemConfiguration'
   m.libraries = 'c++', 'sqlite3', 'z'
-  m.xcconfig = {
+  m.pod_target_xcconfig = {
     'OTHER_CPLUSPLUSFLAGS' => '-std=gnu++11 -stdlib=libc++',
     'OTHER_LDFLAGS' => '-ObjC',
   }

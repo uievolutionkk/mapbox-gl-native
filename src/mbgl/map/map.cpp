@@ -53,6 +53,8 @@ void Map::setView(View* view_) {
 }
 
 void Map::renderStill(StillImageCallback callback) {
+    assert(view);
+
     context->invoke(&MapContext::renderStill, transform->getState(),
                     FrameData{ view->getFramebufferSize() }, callback);
 }

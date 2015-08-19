@@ -55,7 +55,7 @@ void MapContext::setView(View* view_) {
 }
 
 void MapContext::cleanup() {
-    view->notify();
+    if (view) view->notify();
 
     if (styleRequest) {
         FileSource* fs = util::ThreadContext::getFileSource();
@@ -71,7 +71,7 @@ void MapContext::cleanup() {
 
     glObjectStore.performCleanup();
 
-    view->deactivate();
+    if (view) view->deactivate();
 }
 
 void MapContext::pause() {

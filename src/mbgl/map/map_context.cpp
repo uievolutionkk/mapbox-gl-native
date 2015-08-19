@@ -26,6 +26,7 @@
 #include <mbgl/util/exception.hpp>
 
 #include <algorithm>
+#include <iostream>
 
 namespace mbgl {
 
@@ -52,6 +53,8 @@ void MapContext::setView(View* view_) {
 
     view = view_;
     view->activate();
+
+    std::cout << "ACTIVATE" << std::endl;
 }
 
 void MapContext::cleanup() {
@@ -71,7 +74,10 @@ void MapContext::cleanup() {
 
     glObjectStore.performCleanup();
 
-    if (view) view->deactivate();
+    if (view) {
+        std::cout << "DEACTIVATE" << std::endl;
+        view->deactivate();
+    }
 }
 
 void MapContext::pause() {

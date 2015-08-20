@@ -40,6 +40,7 @@ public:
     void swap() override;
     std::unique_ptr<StillImage> readStillImage() override;
 
+    void resizeFramebuffer();
     void resize(uint16_t width, uint16_t height);
 
 private:

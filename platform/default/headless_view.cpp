@@ -18,11 +18,13 @@
 #include <GL/glx.h>
 #endif
 
+#include <iostream>
+
 namespace mbgl {
 
 HeadlessView::HeadlessView(float pixelRatio_, uint16_t width, uint16_t height)
     : display(std::make_shared<HeadlessDisplay>()), pixelRatio(pixelRatio_) {
-    resize(width, height);
+    dimensions = {{ width, height }};
 }
 
 HeadlessView::HeadlessView(std::shared_ptr<HeadlessDisplay> display_,
@@ -30,7 +32,7 @@ HeadlessView::HeadlessView(std::shared_ptr<HeadlessDisplay> display_,
                            uint16_t width,
                            uint16_t height)
     : display(display_), pixelRatio(pixelRatio_) {
-    resize(width, height);
+    dimensions = {{ width, height }};
 }
 
 void HeadlessView::loadExtensions() {
@@ -114,10 +116,10 @@ bool HeadlessView::isActive() {
     return std::this_thread::get_id() == thread;
 }
 
-void HeadlessView::resize(const uint16_t width, const uint16_t height) {
-    activate();
+void HeadlessView::resizeFramebuffer() {
+    assert(isActive());
 
-    dimensions = {{ width, height }};
+    std::cout << "RESIZING FRAMEBUFFER" << std::endl;
 
     clearBuffers();
 
@@ -157,8 +159,17 @@ void HeadlessView::resize(const uint16_t width, const uint16_t height) {
         }
         throw std::runtime_error(error);
     }
+}
 
-    deactivate();
+void HeadlessView::resize(const uint16_t width, const uint16_t height) {
+    std::cout << "RESIZE" << std::endl;
+
+    assert(isActive());
+
+    dimensions = {{ width, height }};
+    map->update(mbgl::Update::Dimensions);
+
+    resizeFramebuffer();
 }
 
 std::unique_ptr<StillImage> HeadlessView::readStillImage() {
@@ -244,6 +255,8 @@ std::array<uint16_t, 2> HeadlessView::getFramebufferSize() const {
 }
 
 void HeadlessView::activate() {
+    std::cout << "ACTIVATE" << std::endl;
+
      if (thread != std::thread::id()) {
         throw std::runtime_error("OpenGL context was already current");
     }
@@ -267,6 +280,8 @@ void HeadlessView::activate() {
 #endif
 
     loadExtensions();
+
+    resizeFramebuffer();
 }
 
 void HeadlessView::deactivate() {

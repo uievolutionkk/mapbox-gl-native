@@ -41,8 +41,6 @@ MapContext::MapContext(View& view_, FileSource& fileSource, MapData& data_)
     util::ThreadContext::setGLObjectStore(&glObjectStore);
 
     asyncUpdate->unref();
-
-    view.activate();
 }
 
 MapContext::~MapContext() {
@@ -51,6 +49,7 @@ MapContext::~MapContext() {
 }
 
 void MapContext::cleanup() {
+    view.activate();
     view.notify();
 
     if (styleRequest) {
@@ -312,6 +311,8 @@ void MapContext::renderStill(const TransformState& state, const FrameData& frame
 MapContext::RenderResult MapContext::renderSync(const TransformState& state, const FrameData& frame) {
     assert(util::ThreadContext::currentlyOn(util::ThreadType::Map));
 
+    view.activate();
+
     // Style was not loaded yet.
     if (!style) {
         return { false, false };
@@ -336,6 +337,7 @@ MapContext::RenderResult MapContext::renderSync(const TransformState& state, con
     }
 
     view.swap();
+    view.deactivate();
 
     return RenderResult {
         style->isLoaded(),

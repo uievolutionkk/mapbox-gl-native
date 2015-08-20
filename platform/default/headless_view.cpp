@@ -169,7 +169,7 @@ void HeadlessView::resize(const uint16_t width, const uint16_t height) {
     dimensions = {{ width, height }};
     map->update(mbgl::Update::Dimensions);
 
-    resizeFramebuffer();
+    // resizeFramebuffer();
 }
 
 std::unique_ptr<StillImage> HeadlessView::readStillImage() {

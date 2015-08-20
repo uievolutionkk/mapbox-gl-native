@@ -60,6 +60,8 @@ void Map::renderStill(StillImageCallback callback) {
 }
 
 bool Map::renderSync() {
+    assert(view);
+
     if (renderState == RenderState::never) {
         view->notifyMapChange(MapChangeWillStartRenderingMap);
     }
@@ -92,6 +94,8 @@ void Map::nudgeTransitions(bool forceRerender) {
 }
 
 void Map::update(Update update_) {
+    assert(view);
+
     if (update_ == Update::Dimensions) {
         transform->resize(view->getSize());
     }

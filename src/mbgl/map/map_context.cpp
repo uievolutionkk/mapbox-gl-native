@@ -53,8 +53,6 @@ void MapContext::setView(View* view_) {
 
     view = view_;
     view->activate();
-
-    std::cout << "ACTIVATE" << std::endl;
 }
 
 void MapContext::cleanup() {
@@ -74,22 +72,19 @@ void MapContext::cleanup() {
 
     glObjectStore.performCleanup();
 
-    if (view) {
-        std::cout << "DEACTIVATE" << std::endl;
-        view->deactivate();
-    }
+    if (view) view->deactivate();
 }
 
 void MapContext::pause() {
     MBGL_CHECK_ERROR(glFinish());
 
-    view->deactivate();
+    if (view) view->deactivate();
 
     std::unique_lock<std::mutex> lockPause(data.mutexPause);
     data.condPaused.notify_all();
     data.condResume.wait(lockPause);
 
-    view->activate();
+    if (view) view->activate();
 }
 
 void MapContext::triggerUpdate(const TransformState& state, const Update u) {
@@ -275,7 +270,7 @@ void MapContext::update() {
 
         style->update(transformState, *texturePool);
 
-        if (data.mode == MapMode::Continuous) {
+        if (view && data.mode == MapMode::Continuous) {
             view->invalidate();
         } else if (callback && style->isLoaded()) {
             renderSync(transformState, frameData);
@@ -321,6 +316,7 @@ void MapContext::renderStill(const TransformState& state, const FrameData& frame
 
 MapContext::RenderResult MapContext::renderSync(const TransformState& state, const FrameData& frame) {
     assert(util::ThreadContext::currentlyOn(util::ThreadType::Map));
+    assert(view);
 
     // Style was not loaded yet.
     if (!style) {
@@ -375,7 +371,7 @@ void MapContext::setSourceTileCacheSize(size_t size) {
         for (const auto &source : style->sources) {
             source->setCacheSize(sourceCacheSize);
         }
-        view->invalidate();
+        if (view) view->invalidate();
     }
 }
 
@@ -385,7 +381,7 @@ void MapContext::onLowMemory() {
     for (const auto &source : style->sources) {
         source->onLowMemory();
     }
-    view->invalidate();
+    if (view) view->invalidate();
 }
 
 void MapContext::setSprite(const std::string& name, std::shared_ptr<const SpriteImage> sprite) {

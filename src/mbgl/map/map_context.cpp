@@ -317,6 +317,8 @@ MapContext::RenderResult MapContext::renderSync(const TransformState& state, con
         return { false, false };
     }
 
+    view.beforeRender();
+
     transformState = state;
 
     // Cleanup OpenGL objects that we abandoned since the last render call.
@@ -335,7 +337,7 @@ MapContext::RenderResult MapContext::renderSync(const TransformState& state, con
         callback = nullptr;
     }
 
-    view.swap();
+    view.afterRender();
 
     return RenderResult {
         style->isLoaded(),

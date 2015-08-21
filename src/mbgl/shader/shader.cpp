@@ -20,8 +20,6 @@ Shader::Shader(const char *name_, const GLchar *vertSource, const GLchar *fragSo
 
     program = MBGL_CHECK_ERROR(glCreateProgram());
 
-    GLuint vertShader = 0;
-    GLuint fragShader = 0;
     if (!compileShader(&vertShader, GL_VERTEX_SHADER, vertSource)) {
         Log::Error(Event::Shader, "Vertex shader %s failed to compile: %s", name, vertSource);
         MBGL_CHECK_ERROR(glDeleteProgram(program));
@@ -66,12 +64,6 @@ Shader::Shader(const char *name_, const GLchar *vertSource, const GLchar *fragSo
             throw util::ShaderException(std::string { "Program " } + name + " failed to link: " + log.get());
         }
     }
-
-    // Remove the compiled shaders; they are now part of the program.
-    MBGL_CHECK_ERROR(glDetachShader(program, vertShader));
-    MBGL_CHECK_ERROR(glDeleteShader(vertShader));
-    MBGL_CHECK_ERROR(glDetachShader(program, fragShader));
-    MBGL_CHECK_ERROR(glDeleteShader(fragShader));
 }
 
 
@@ -113,7 +105,13 @@ bool Shader::compileShader(GLuint *shader, GLenum type, const GLchar *source) {
 
 Shader::~Shader() {
     if (program) {
+        MBGL_CHECK_ERROR(glDetachShader(program, vertShader));
+        MBGL_CHECK_ERROR(glDetachShader(program, fragShader));
         MBGL_CHECK_ERROR(glDeleteProgram(program));
         program = 0;
+        MBGL_CHECK_ERROR(glDeleteShader(vertShader));
+        vertShader = 0;
+        MBGL_CHECK_ERROR(glDeleteShader(fragShader));
+        fragShader = 0;
     }
 }

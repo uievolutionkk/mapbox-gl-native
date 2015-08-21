@@ -21,6 +21,9 @@ public:
 
 private:
     bool compileShader(uint32_t *shader, uint32_t type, const char *source);
+
+    uint32_t vertShader = 0;
+    uint32_t fragShader = 0;
 };
 
 }

@@ -874,7 +874,13 @@ std::chrono::steady_clock::duration secondsAsDuration(float duration)
         CGPoint delta = CGPointMake([pan translationInView:pan.view].x - self.centerPoint.x,
                                     [pan translationInView:pan.view].y - self.centerPoint.y);
 
-        _mbglMap->moveBy(delta.x, delta.y);
+        _mbglMap->setLatLng(
+            _mbglMap->latLngForPixel(mbgl::vec2<double>(
+                [pan locationInView:pan.view].x - delta.x,
+                [pan locationInView:pan.view].y - delta.y)),
+            mbgl::vec2<double>(
+                [pan locationInView:pan.view].x,
+                [pan locationInView:pan.view].y));
 
         self.centerPoint = CGPointMake(self.centerPoint.x + delta.x, self.centerPoint.y + delta.y);
 

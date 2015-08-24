@@ -5,6 +5,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/unitbezier.hpp>
 #include <mbgl/util/interpolate.hpp>
+#include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/platform/platform.hpp>
 
 #include <cstdio>
@@ -107,6 +108,27 @@ void Transform::setLatLng(const LatLng latLng, const Duration& duration) {
     double yn = 0.5 * state.Cc * std::log((1 + f) / (1 - f));
 
     _setScaleXY(state.scale, xn, yn, duration);
+}
+
+void Transform::setLatLng(const LatLng latLng, vec2<double> point, const Duration& duration) {
+    if (std::isnan(latLng.latitude) || std::isnan(latLng.longitude)) {
+        return;
+    }
+
+    auto coord = state.latLngToCoordinate(latLng);
+    auto coordAtPoint = state.pointToCoordinate(point);
+    auto coordCenter = state.pointToCoordinate({ state.width / 2.0f, state.height / 2.0f });
+
+    float columnDiff = coordAtPoint.column - coord.column;
+    float rowDiff = coordAtPoint.row - coord.row;
+
+    auto newLatLng = state.coordinateToLatLng({
+            coordCenter.column - columnDiff,
+            coordCenter.row - rowDiff,
+            coordCenter.zoom
+    });
+
+    setLatLng(newLatLng, duration);
 }
 
 void Transform::setLatLngZoom(const LatLng latLng, const double zoom, const Duration& duration) {

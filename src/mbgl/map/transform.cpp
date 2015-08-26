@@ -316,18 +316,17 @@ void Transform::setAngle(const double new_angle, const double cx, const double c
         return;
     }
 
-    double dx = 0, dy = 0;
+    LatLng rotationCenter;
 
     if (cx >= 0 && cy >= 0) {
-        dx = (static_cast<double>(state.width) / 2.0) - cx;
-        dy = (static_cast<double>(state.height) / 2.0) - cy;
-        _moveBy(dx, dy, Duration::zero());
+        rotationCenter = state.pointToLatLng({ cx, cy });
+        setLatLng(rotationCenter, Duration::zero());
     }
 
     _setAngle(new_angle, Duration::zero());
 
     if (cx >= 0 && cy >= 0) {
-        _moveBy(-dx, -dy, Duration::zero());
+        setLatLng(rotationCenter, { cx, cy }, Duration::zero());
     }
 }
 

@@ -33,7 +33,7 @@
     "tape": "^4.2.0"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false || make node",
+    "install": "node-pre-gyp install --fallback-to-build=true || make node",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-suite": "tape platform/node/test/render.test.js"
   },

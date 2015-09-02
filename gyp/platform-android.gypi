@@ -35,6 +35,7 @@
           '<@(jpeg_ldflags)',
           '<@(libuv_ldflags)',
           '<@(nunicode_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libpng_static_libs)',

@@ -19,12 +19,16 @@
         'cflags_cc': [
           '<@(libuv_cflags)',
           '<@(boost_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'ldflags': [
           '<@(libuv_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libuv_static_libs)',
+          '<@(geojsonvt_static_libs)',
         ],
         'defines': [
           '-DMBGL_HTTP_ANDROID'

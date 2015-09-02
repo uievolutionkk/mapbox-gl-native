@@ -44,6 +44,7 @@
         'ldflags': [
           '<@(libuv_ldflags)',
           '<@(opengl_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libuv_static_libs)',

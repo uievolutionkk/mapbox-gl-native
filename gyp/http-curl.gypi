@@ -20,10 +20,13 @@
           '<@(libuv_cflags)',
           '<@(libcurl_cflags)',
           '<@(boost_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'ldflags': [
           '<@(libuv_ldflags)',
           '<@(libcurl_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libuv_static_libs)',

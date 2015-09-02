@@ -18,13 +18,17 @@
       'variables': {
         'cflags_cc': [
           '<@(libuv_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'ldflags': [
           '-framework Foundation', # For NSURLRequest
           '<@(libuv_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libuv_static_libs)',
+          '<@(geojsonvt_static_libs)',
         ],
         'defines': [
           '-DMBGL_HTTP_NSURL'

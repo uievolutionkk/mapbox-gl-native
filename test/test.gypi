@@ -110,6 +110,7 @@
         'ldflags': [
           '<@(libuv_ldflags)',
           '<@(sqlite_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
       },
       'conditions': [

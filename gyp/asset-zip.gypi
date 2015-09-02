@@ -20,19 +20,25 @@
         'cflags': [
           '<@(libuv_cflags)',
           '<@(libzip_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'cflags_cc': [
           '<@(libuv_cflags)',
           '<@(libzip_cflags)',
           '<@(boost_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'ldflags': [
           '<@(libuv_ldflags)',
           '<@(libzip_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(libuv_static_libs)',
           '<@(libzip_static_libs)',
+          '<@(geojsonvt_static_libs)',
         ],
         'defines': [
           '-DMBGL_ASSET_ZIP'

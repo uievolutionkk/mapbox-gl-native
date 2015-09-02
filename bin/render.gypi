@@ -30,14 +30,18 @@
           '<@(glfw_cflags)',
           '<@(libuv_cflags)',
           '<@(boost_cflags)',
+          '<@(geojsonvt_cflags)',
+          '<@(variant_cflags)',
         ],
         'ldflags': [
           '<@(glfw_ldflags)',
           '<@(libuv_ldflags)',
+          '<@(geojsonvt_ldflags)',
         ],
         'libraries': [
           '<@(glfw_static_libs)',
           '<@(libuv_static_libs)',
+          '<@(geojsonvt_static_libs)',
           '<@(boost_libprogram_options_static_libs)'
         ],
       },

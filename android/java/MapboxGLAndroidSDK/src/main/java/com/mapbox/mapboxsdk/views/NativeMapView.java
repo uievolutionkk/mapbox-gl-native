@@ -1,6 +1,8 @@
 package com.mapbox.mapboxsdk.views;
 
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.view.Surface;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -10,6 +12,7 @@ import com.mapbox.mapboxsdk.geometry.BoundingBox;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngZoom;
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters;
+
 import java.util.List;
 
 // Class that wraps the native methods for convenience
@@ -365,6 +368,10 @@ final class NativeMapView {
         nativeSetSprite(mNativeMapViewPtr, symbol, width, height, scale, pixels);
     }
 
+    public void setVisibleCoordinateBounds(LatLng[] coordinates, RectF padding, double direction, long duration) {
+        nativeSetVisibleCoordinateBounds(mNativeMapViewPtr, coordinates, padding, direction, duration);
+    }
+
     public void onLowMemory() {
         nativeOnLowMemory(mNativeMapViewPtr);
     }
@@ -465,7 +472,7 @@ final class NativeMapView {
     private native void nativeTerminateContext(long nativeMapViewPtr);
 
     private native void nativeCreateSurface(long nativeMapViewPtr,
-            Surface surface);
+                                            Surface surface);
 
     private native void nativeDestroySurface(long nativeMapViewPtr);
 
@@ -488,7 +495,7 @@ final class NativeMapView {
     private native boolean nativeHasClass(long nativeMapViewPtr, String clazz);
 
     private native void nativeSetClasses(long nativeMapViewPtr,
-            List<String> classes);
+                                         List<String> classes);
 
     private native List<String> nativeGetClasses(long nativeMapViewPtr);
 
@@ -500,7 +507,7 @@ final class NativeMapView {
     private native void nativeSetStyleUrl(long nativeMapViewPtr, String url);
 
     private native void nativeSetStyleJson(long nativeMapViewPtr,
-            String newStyleJson, String base);
+                                           String newStyleJson, String base);
 
     private native String nativeGetStyleJson(long nativeMapViewPtr);
 
@@ -513,7 +520,7 @@ final class NativeMapView {
     private native void nativeSetGestureInProgress(long nativeMapViewPtr, boolean inProgress);
 
     private native void nativeMoveBy(long nativeMapViewPtr, double dx,
-            double dy, long duration);
+                                     double dy, long duration);
 
     private native void nativeSetLatLng(long nativeMapViewPtr, LatLng latLng,
                                         long duration);
@@ -523,10 +530,10 @@ final class NativeMapView {
     private native void nativeResetPosition(long nativeMapViewPtr);
 
     private native void nativeScaleBy(long nativeMapViewPtr, double ds,
-            double cx, double cy, long duration);
+                                      double cx, double cy, long duration);
 
     private native void nativeSetScale(long nativeMapViewPtr, double scale,
-            double cx, double cy, long duration);
+                                       double cx, double cy, long duration);
 
     private native double nativeGetScale(long nativeMapViewPtr);
 
@@ -536,7 +543,7 @@ final class NativeMapView {
     private native double nativeGetZoom(long nativeMapViewPtr);
 
     private native void nativeSetLatLngZoom(long nativeMapViewPtr,
-            LatLngZoom lonLatZoom, long duration);
+                                            LatLngZoom lonLatZoom, long duration);
 
     private native LatLngZoom nativeGetLatLngZoom(long nativeMapViewPtr);
 
@@ -547,13 +554,13 @@ final class NativeMapView {
     private native double nativeGetMaxZoom(long nativeMapViewPtr);
 
     private native void nativeRotateBy(long nativeMapViewPtr, double sx,
-            double sy, double ex, double ey, long duration);
+                                       double sy, double ex, double ey, long duration);
 
     private native void nativeSetBearing(long nativeMapViewPtr, double degrees,
-            long duration);
+                                         long duration);
 
     private native void nativeSetBearing(long nativeMapViewPtr, double degrees,
-            double cx, double cy);
+                                         double cx, double cy);
 
     private native double nativeGetBearing(long nativeMapViewPtr);
 
@@ -577,6 +584,8 @@ final class NativeMapView {
 
     private native void nativeSetSprite(long nativeMapViewPtr, String symbol,
                                         int width, int height, float scale, byte[] pixels);
+
+    private native void nativeSetVisibleCoordinateBounds(long mNativeMapViewPtr, LatLng[] coordinates, RectF padding, double direction, long duration);
 
     private native void nativeOnLowMemory(long nativeMapViewPtr);
 

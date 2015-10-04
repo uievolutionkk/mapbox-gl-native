@@ -89,6 +89,11 @@
                   android:checkable="false"
                   android:icon="@drawable/ic_pin_drop_white_24dp"
                   android:title="@string/action_press_for_marker"/>
+
+            <item android:id="@+id/action_visible_bounds"
+                android:checkable="false"
+                android:icon="@drawable/ic_action_crop"
+                android:title="@string/action_visible_bounds"/>
         </menu>
     </item>
 

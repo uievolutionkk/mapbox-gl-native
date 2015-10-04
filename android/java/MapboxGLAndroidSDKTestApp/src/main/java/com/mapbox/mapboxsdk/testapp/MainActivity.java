@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,6 +30,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.constants.Style;
+import com.mapbox.mapboxsdk.geometry.CoordinateBounds;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.utils.ApiAccess;
 import com.mapbox.mapboxsdk.views.MapView;
@@ -124,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
             public void onMapClick(LatLng point) {
                 String location = latLngFormatter.format(point.getLatitude()) + ", " +
                         latLngFormatter.format(point.getLongitude());
-                Snackbar.make(findViewById(android.R.id.content), "Map Click Listener " + location, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(android.R.id.content), "Map Click Listener " + location, Snackbar.LENGTH_SHORT)
+                        .show();
             }
         });
 
@@ -160,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
             mIsAnnotationsOn = savedInstanceState.getBoolean(STATE_IS_ANNOTATIONS_ON);
             mSelectedStyle = savedInstanceState.getInt(STATE_SELECTED_STYLE);
         }
-
 
         // Set default UI state
         mNavigationView.getMenu().findItem(R.id.action_compass).setChecked(mMapView.isCompassEnabled());
@@ -298,6 +300,13 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(new Intent(getApplicationContext(), InfoWindowActivity.class));
                                 return true;
 
+                            case R.id.action_visible_bounds:
+                                // Set visible bounds to Moscone Center West (37.783703, -122.403589) and Union Square (37.7874436,-122.4072359)
+                                mMapView.setVisibleCoordinateBounds(
+                                        new CoordinateBounds(new LatLng(37.783703, -122.403589), new LatLng(37.7874436,-122.4072359)),
+                                        new RectF(100, 350, 100, 300), true);
+                                return true;
+
                             default:
                                 return changeMapStyle(menuItem.getItemId());
                         }
@@ -354,9 +363,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private void toggleGps(boolean enableGps) {
         if (enableGps) {
-            if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                    (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_LOCATION);
+            if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) ||
+                    (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED)) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_LOCATION);
             } else {
                 enableGps();
             }
@@ -400,10 +413,11 @@ public class MainActivity extends AppCompatActivity {
         final MarkerOptions backLot = generateMarker("Back Lot", "The back lot behind my house", null, 38.649441, -121.369064);
         markerOptionsList.add(backLot);
 
-        final MarkerOptions cheeseRoom = generateMarker("Cheese Room", "The only air conditioned room on the property", "dog-park-15", 38.531577, -122.010646);
+        final MarkerOptions cheeseRoom = generateMarker("Cheese Room", "The only air conditioned room on the property",
+                "dog-park-15", 38.531577, -122.010646);
         markerOptionsList.add(cheeseRoom);
 
-       List<Marker> markers = mMapView.addMarkers(markerOptionsList);
+        List<Marker> markers = mMapView.addMarkers(markerOptionsList);
 
         // need to call this after adding markers to map, click event hook into InfoWindow needs refactoring
         final Marker backLotMarker = markers.get(0);
@@ -417,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private MarkerOptions generateMarker(String title, String snippet, String sprite, double lat, double lng){
+    private MarkerOptions generateMarker(String title, String snippet, String sprite, double lat, double lng) {
         return new MarkerOptions()
                 .position(new LatLng(lat, lng))
                 .title(title)

@@ -1563,6 +1563,14 @@ public final class MapView extends FrameLayout {
         return new PointF(x, y);
     }
 
+    public void moveBy(double dx, double dy) {
+        moveBy(dx, dy, 0);
+    }
+
+    public void moveBy(double dx, double dy, long duration) {
+        mNativeMapView.moveBy(dx, dy, duration);
+    }
+
     //
     // Annotations
     //

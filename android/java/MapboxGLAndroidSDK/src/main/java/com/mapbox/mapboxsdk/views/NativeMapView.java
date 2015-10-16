@@ -1,7 +1,6 @@
 package com.mapbox.mapboxsdk.views;
 
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.Surface;
 
@@ -12,7 +11,6 @@ import com.mapbox.mapboxsdk.geometry.BoundingBox;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngZoom;
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters;
-
 import java.util.List;
 
 // Class that wraps the native methods for convenience
@@ -591,7 +589,8 @@ final class NativeMapView {
     private native void nativeSetSprite(long nativeMapViewPtr, String symbol,
                                         int width, int height, float scale, byte[] pixels);
 
-    private native void nativeSetVisibleCoordinateBounds(long mNativeMapViewPtr, LatLng[] coordinates, RectF padding, double direction, long duration);
+    private native void nativeSetVisibleCoordinateBounds(long mNativeMapViewPtr, LatLng[] coordinates,
+                                                         RectF padding, double direction, long duration);
 
     private native void nativeOnLowMemory(long nativeMapViewPtr);
 

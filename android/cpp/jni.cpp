@@ -2207,3 +2207,4 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     theJVM = nullptr;
 }
 }
+

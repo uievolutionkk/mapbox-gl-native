@@ -1589,7 +1589,7 @@ public final class MapView extends FrameLayout {
     //
 
     // Marking this function private until #2506 fixed
-    private void setSprite(String symbol, Bitmap bitmap) {
+    public void setSprite(String symbol, Bitmap bitmap) {
         if (bitmap.getConfig() != Bitmap.Config.ARGB_8888) {
             bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false);
         }

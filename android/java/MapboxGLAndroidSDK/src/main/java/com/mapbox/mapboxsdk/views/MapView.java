@@ -573,7 +573,10 @@ public final class MapView extends FrameLayout {
         mScreenDensityDpi = context.getResources().getDisplayMetrics().densityDpi;
 
         // Get the cache path
-        String cachePath = context.getCacheDir().getAbsolutePath();
+        // UIE temporary change. Set cache into external storage for data
+        //String cachePath = context.getCacheDir().getAbsolutePath();
+        String cachePath = context.getExternalFilesDir(null).getAbsolutePath();
+
         String dataPath = context.getFilesDir().getAbsolutePath();
         String apkPath = context.getPackageCodePath();
 

@@ -2248,14 +2248,14 @@ public final class MapView extends FrameLayout {
                 long tapInterval = event.getEventTime() - event.getDownTime();
                 boolean isTap = tapInterval <= ViewConfiguration.getTapTimeout();
                 boolean inProgress = mRotateGestureDetector.isInProgress() || mScaleGestureDetector.isInProgress();
-
+/* UIE Workaround
                 if (mTwoTap && isTap && !inProgress) {
                     PointF focalPoint = TwoFingerGestureDetector.determineFocalPoint(event);
                     zoom(false, focalPoint.x, focalPoint.y);
                     mTwoTap = false;
                     return true;
                 }
-
+*/
                 mTwoTap = false;
                 mNativeMapView.setGestureInProgress(false);
                 break;
@@ -2288,6 +2288,9 @@ public final class MapView extends FrameLayout {
         // Called for double taps
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            // UIE Workaround
+            return false;
+/*
             if (!mZoomEnabled) {
                 return false;
             }
@@ -2296,6 +2299,7 @@ public final class MapView extends FrameLayout {
             // Zoom in
             zoom(true, e.getX(), e.getY());
             return true;
+*/
         }
 
         @Override

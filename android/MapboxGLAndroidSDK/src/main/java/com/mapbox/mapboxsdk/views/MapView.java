@@ -2288,9 +2288,6 @@ public final class MapView extends FrameLayout {
         // Called for double taps
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            // UIE Workaround
-            return false;
-/*
             if (!mZoomEnabled) {
                 return false;
             }
@@ -2299,7 +2296,6 @@ public final class MapView extends FrameLayout {
             // Zoom in
             zoom(true, e.getX(), e.getY());
             return true;
-*/
         }
 
         @Override

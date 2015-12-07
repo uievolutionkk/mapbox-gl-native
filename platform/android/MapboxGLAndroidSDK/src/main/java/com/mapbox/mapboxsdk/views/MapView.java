@@ -2948,9 +2948,6 @@ public final class MapView extends FrameLayout {
         // Called for double taps
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            // UIE Workaround
-            return false;
-/*
             if (!mZoomEnabled) {
                 return false;
             }
@@ -2978,7 +2975,6 @@ public final class MapView extends FrameLayout {
             }
 
             return true;
-*/
         }
 
         @Override

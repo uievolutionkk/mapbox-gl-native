@@ -77,7 +77,8 @@ android: android-lib
 # Builds all android architectures for distribution.
 apackage: android-lib-arm-v5 android-lib-arm-v7
 apackage: android-lib-x86
-apackage: android-lib-mips
+#UIE temporary change. Removed mips binary.
+#apackage: android-lib-mips
 	cd android && ./gradlew --parallel-threads=$(JOBS) assemble$(BUILDTYPE)
 
 # Builds the Node.js library

@@ -8,6 +8,7 @@
 #include <mbgl/util/interpolate.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/platform/platform.hpp>
+#include <mbgl/platform/log.hpp>
 
 #include <cstdio>
 
@@ -111,6 +112,22 @@ void Transform::setLatLng(const LatLng latLng, const Duration& duration) {
     CameraOptions options;
     options.center = latLng;
     options.duration = duration;
+    easeTo(options);
+}
+
+void Transform::setLatLngAngle(const LatLng latLng, const double new_angle, const Duration& duration) {
+    if (std::isnan(latLng.latitude) || std::isnan(latLng.longitude)) {
+        return;
+    }
+    if (std::isnan(new_angle)) {
+        return;
+    }
+
+    CameraOptions options;
+    options.center = latLng;
+    options.angle = new_angle;
+    options.duration = duration;
+    options.easing = util::UnitBezier(1/3.0, 1/3.0, 2/3.0, 2/3.0);  // Linear animation
     easeTo(options);
 }
 
@@ -385,7 +402,6 @@ void Transform::startTransition(std::function<double(double)> easing,
 
     transitionStart = Clock::now();
     transitionDuration = duration;
-
     transitionFrameFn = [easing, frame, this](const TimePoint now) {
         float t = std::chrono::duration<float>(now - transitionStart) / transitionDuration;
         if (t >= 1.0) {

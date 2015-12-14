@@ -248,6 +248,10 @@ final class NativeMapView {
         nativeSetLatLng(mNativeMapViewPtr, latLng, duration);
     }
 
+    public void setLatLngBearing(LatLng latLng, double degrees, long duration) {
+        nativeSetLatLngBearing(mNativeMapViewPtr, latLng, degrees, duration);
+    }
+
     public LatLng getLatLng() {
         return nativeGetLatLng(mNativeMapViewPtr);
     }
@@ -540,6 +544,9 @@ final class NativeMapView {
 
     private native void nativeSetLatLng(long nativeMapViewPtr, LatLng latLng,
                                         long duration);
+
+    private native void nativeSetLatLngBearing(long nativeMapViewPtr, LatLng latLng,
+                                        double degrees, long duration);
 
     private native LatLng nativeGetLatLng(long nativeMapViewPtr);
 

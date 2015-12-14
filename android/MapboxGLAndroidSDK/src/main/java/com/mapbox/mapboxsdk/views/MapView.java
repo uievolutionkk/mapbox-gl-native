@@ -107,7 +107,7 @@ public final class MapView extends FrameLayout {
     private static final String TAG = "MapView";
 
     // Used for animation
-    private static final long ANIMATION_DURATION = 300;
+    private static final long ANIMATION_DURATION = 1000; //300;
 
     // Used for saving instance state
     private static final String STATE_CENTER_COORDINATE = "centerCoordinate";
@@ -1000,6 +1000,16 @@ public final class MapView extends FrameLayout {
         long duration = animated ? ANIMATION_DURATION : 0;
         mNativeMapView.cancelTransitions();
         mNativeMapView.setLatLng(centerCoordinate, duration);
+    }
+
+    @UiThread
+    public void setCenterCoordinateDirection(LatLng centerCoordinate, double direction, int duration) {
+        if (centerCoordinate == null) {
+            Log.w(TAG, "centerCoordinate was null, so just returning");
+            return;
+        }
+        mNativeMapView.cancelTransitions();
+        mNativeMapView.setLatLngBearing(centerCoordinate, direction, duration);
     }
 
 

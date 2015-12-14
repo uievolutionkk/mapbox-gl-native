@@ -640,6 +640,27 @@ void JNICALL nativeSetLatLng(JNIEnv *env, jobject obj, jlong nativeMapViewPtr, j
     nativeMapView->getMap().setLatLng(mbgl::LatLng(latitude, longitude), mbgl::Duration(duration));
 }
 
+void JNICALL nativeSetLatLngBearing(JNIEnv *env, jobject obj, jlong nativeMapViewPtr, jobject latLng,
+                             jdouble degrees, jlong duration) {
+    mbgl::Log::Debug(mbgl::Event::JNI, "nativeSetLatLngBearing");
+    assert(nativeMapViewPtr != 0);
+    NativeMapView *nativeMapView = reinterpret_cast<NativeMapView *>(nativeMapViewPtr);
+
+    jdouble latitude = env->GetDoubleField(latLng, latLngLatitudeId);
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        return;
+    }
+
+    jdouble longitude = env->GetDoubleField(latLng, latLngLongitudeId);
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        return;
+    }
+
+    nativeMapView->getMap().setLatLngBearing(mbgl::LatLng(latitude, longitude), degrees, std::chrono::milliseconds(duration)/*mbgl::Duration(duration)*/);
+}
+
 jobject JNICALL nativeGetLatLng(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
     mbgl::Log::Debug(mbgl::Event::JNI, "nativeGetLatLng");
     assert(nativeMapViewPtr != 0);
@@ -1897,6 +1918,8 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
         {"nativeMoveBy", "(JDDJ)V", reinterpret_cast<void *>(&nativeMoveBy)},
         {"nativeSetLatLng", "(JLcom/mapbox/mapboxsdk/geometry/LatLng;J)V",
          reinterpret_cast<void *>(&nativeSetLatLng)},
+        {"nativeSetLatLngBearing", "(JLcom/mapbox/mapboxsdk/geometry/LatLng;DJ)V",
+         reinterpret_cast<void *>(&nativeSetLatLngBearing)},
         {"nativeGetLatLng", "(J)Lcom/mapbox/mapboxsdk/geometry/LatLng;",
          reinterpret_cast<void *>(&nativeGetLatLng)},
         {"nativeResetPosition", "(J)V", reinterpret_cast<void *>(&nativeResetPosition)},

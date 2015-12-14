@@ -166,6 +166,11 @@ void Map::setLatLng(LatLng latLng, const Duration& duration) {
     update(Update::Repaint);
 }
 
+void Map::setLatLngBearing(LatLng latLng, double degrees, const Duration& duration) {
+    transform->setLatLngAngle(latLng, -degrees * M_PI / 180, duration);
+    update(Update::Repaint);
+}
+
 void Map::setLatLng(LatLng latLng, vec2<double> point, const Duration& duration) {
     transform->setLatLng(latLng, point, duration);
     update(Update::Repaint);

@@ -2218,11 +2218,13 @@ public final class MapView extends FrameLayout {
 
         if ((event.getButtonState() != 0) && (event.getButtonState() != MotionEvent.BUTTON_PRIMARY)) {
 	    // UIE Workaround: Begin
-	    if (event.getButtonState() == MotionEvent.BUTTON_TERTIARY) {
-		// not retun with false, fall through to 7 lines below.
-	    } else
+	    /* was:
+	    return false;
+	    */
+	    if (event.getButtonState() != MotionEvent.BUTTON_TERTIARY) {
+		return false;
+	    }
 	    // UIE Workaround: End
-            return false;
         }
 
         // Check two finger gestures first

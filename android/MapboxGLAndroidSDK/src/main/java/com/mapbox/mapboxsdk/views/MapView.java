@@ -2217,6 +2217,11 @@ public final class MapView extends FrameLayout {
         // Check and ignore non touch or left clicks
 
         if ((event.getButtonState() != 0) && (event.getButtonState() != MotionEvent.BUTTON_PRIMARY)) {
+	    // UIE Workaround: Begin
+	    if (event.getButtonState() == MotionEvent.BUTTON_TERTIARY) {
+		// not retun with false, fall through to 7 lines below.
+	    } else
+	    // UIE Workaround: End
             return false;
         }
 

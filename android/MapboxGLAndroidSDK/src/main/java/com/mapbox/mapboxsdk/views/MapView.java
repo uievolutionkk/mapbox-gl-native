@@ -2220,7 +2220,14 @@ public final class MapView extends FrameLayout {
         // Check and ignore non touch or left clicks
 
         if ((event.getButtonState() != 0) && (event.getButtonState() != MotionEvent.BUTTON_PRIMARY)) {
-            return false;
+	    // UIE Workaround: Begin
+	    /* was:
+	    return false;
+	    */
+	    if (event.getButtonState() != MotionEvent.BUTTON_TERTIARY) {
+		return false;
+	    }
+	    // UIE Workaround: End
         }
 
         // Check two finger gestures first

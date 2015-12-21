@@ -2258,14 +2258,14 @@ public final class MapView extends FrameLayout {
                 long tapInterval = event.getEventTime() - event.getDownTime();
                 boolean isTap = tapInterval <= ViewConfiguration.getTapTimeout();
                 boolean inProgress = mRotateGestureDetector.isInProgress() || mScaleGestureDetector.isInProgress();
-
+/* UIE Workaround
                 if (mTwoTap && isTap && !inProgress) {
                     PointF focalPoint = TwoFingerGestureDetector.determineFocalPoint(event);
                     zoom(false, focalPoint.x, focalPoint.y);
                     mTwoTap = false;
                     return true;
                 }
-
+*/
                 mTwoTap = false;
                 mNativeMapView.setGestureInProgress(false);
                 break;

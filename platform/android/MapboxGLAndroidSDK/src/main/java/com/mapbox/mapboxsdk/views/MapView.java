@@ -2940,8 +2940,10 @@ public final class MapView extends FrameLayout {
                 mZoomButtonsController.setVisible(true);
             }
 
-            setMyLocationTrackingMode(MyLocationTracking.TRACKING_NONE);
-            setMyBearingTrackingMode(MyBearingTracking.NONE);
+            if (isMyLocationEnabled()) { // UIE work around.
+		setMyLocationTrackingMode(MyLocationTracking.TRACKING_NONE);
+		setMyBearingTrackingMode(MyBearingTracking.NONE);
+	    }
             return true;
         }
 

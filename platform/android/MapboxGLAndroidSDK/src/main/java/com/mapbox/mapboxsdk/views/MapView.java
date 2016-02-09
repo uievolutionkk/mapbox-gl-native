@@ -56,7 +56,6 @@ import android.widget.ZoomButtonsController;
 
 import com.almeros.android.multitouch.gesturedetectors.RotateGestureDetector;
 import com.almeros.android.multitouch.gesturedetectors.ShoveGestureDetector;
-import com.almeros.android.multitouch.gesturedetectors.TwoFingerGestureDetector;
 import com.mapbox.mapboxsdk.R;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -246,6 +245,9 @@ public final class MapView extends FrameLayout {
     // Used to manage fling and scroll event listeners
     private OnFlingListener mOnFlingListener;
     private OnScrollListener mOnScrollListener;
+
+    // UIE
+    private OnRotateListener mOnRotateListener;
 
     // Used to manage marker click event listeners
     private OnMarkerClickListener mOnMarkerClickListener;
@@ -515,6 +517,13 @@ public final class MapView extends FrameLayout {
          * @param point The projected map coordinate the user long clicked on.
          */
         void onMapLongClick(@NonNull LatLng point);
+    }
+
+    // UIE
+    public interface OnRotateListener {
+        void onRotateBegin();
+        void onRotate(float bearing);
+        void onRotateEnd();
     }
 
     /**
@@ -3223,6 +3232,10 @@ public final class MapView extends FrameLayout {
             }
 
             mBeginTime = detector.getEventTime();
+            // UIE
+            if (mOnRotateListener != null) {
+                mOnRotateListener.onRotateBegin();
+            }
             return true;
         }
 
@@ -3232,6 +3245,10 @@ public final class MapView extends FrameLayout {
             mBeginTime = 0;
             mTotalAngle = 0.0f;
             mStarted = false;
+            //UIE
+            if (mOnRotateListener != null) {
+                mOnRotateListener.onRotateEnd();
+            }
         }
 
         // Called each time one of the two fingers moves
@@ -3280,6 +3297,12 @@ public final class MapView extends FrameLayout {
                         (getWidth() / 2) / mScreenDensity,
                         (getHeight() / 2) / mScreenDensity);
             }
+
+            //UIE
+            if (mOnRotateListener != null) {
+                mOnRotateListener.onRotate((float) bearing);
+            }
+
             return true;
         }
     }
@@ -3811,6 +3834,13 @@ public final class MapView extends FrameLayout {
     public void setOnMapLongClickListener(@Nullable OnMapLongClickListener listener) {
         mOnMapLongClickListener = listener;
     }
+
+    //UIE
+    @UiThread
+    public void setOnRotateListener(@Nullable OnRotateListener listener) {
+        mOnRotateListener = listener;
+    }
+
 
     /**
      * Sets a callback that's invoked when the user clicks on a marker.

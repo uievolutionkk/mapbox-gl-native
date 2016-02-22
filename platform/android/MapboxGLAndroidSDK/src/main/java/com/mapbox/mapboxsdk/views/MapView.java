@@ -56,6 +56,7 @@ import android.widget.ZoomButtonsController;
 
 import com.almeros.android.multitouch.gesturedetectors.RotateGestureDetector;
 import com.almeros.android.multitouch.gesturedetectors.ShoveGestureDetector;
+import com.almeros.android.multitouch.gesturedetectors.TwoFingerGestureDetector;
 import com.mapbox.mapboxsdk.R;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -156,6 +157,11 @@ public final class MapView extends FrameLayout {
     private static final String STATE_ATTRIBUTION_MARGIN_RIGHT = "attrMarginRight";
     private static final String STATE_ATTRIBUTION_MARGIN_BOTTOM = "atrrMarginBottom";
     private static final String STATE_ATTRIBUTION_VISIBILITY = "atrrVisibility";
+    // UIE
+    private static final String STATE_INHIBIT_DOUBLE_TAP = "inhibitDoubleTap";
+    private static final String STATE_INHIBIT_PINCH = "inhibitPinch";
+    private static final String STATE_INHIBIT_TAP2FINGER = "inhibitTap2Finger";
+    private static final String STATE_INHIBIT_QUICK_SCALE = "inhibitQuickScale";
 
     // Used for positioning views
     private static final float DIMENSION_SEVEN_DP = 7f;
@@ -248,6 +254,7 @@ public final class MapView extends FrameLayout {
 
     // UIE
     private OnRotateListener mOnRotateListener;
+    private OnScaleListener mOnScaleListener;
 
     // Used to manage marker click event listeners
     private OnMarkerClickListener mOnMarkerClickListener;
@@ -259,6 +266,18 @@ public final class MapView extends FrameLayout {
     // Used to manage tracking mode changes
     private OnMyLocationTrackingModeChangeListener mOnMyLocationTrackingModeChangeListener;
     private OnMyBearingTrackingModeChangeListener mOnMyBearingTrackingModeChangeListener;
+
+    // UIE
+    private boolean mInhibitDoubleTap = false;
+    private boolean mInhibitPinch = false;
+    private boolean mInhibitTap2Finger = false;
+    private boolean mInhibitQuickScale = false;
+
+    private boolean mRotateCenter = false;
+
+    private boolean mInhibitLongPress = false;
+    private boolean mInhibitScroll = false;
+    // UIE
 
     //
     // Properties
@@ -525,6 +544,14 @@ public final class MapView extends FrameLayout {
         void onRotate(float bearing);
         void onRotateEnd();
     }
+
+    public interface OnScaleListener {
+        void onScaleBegin();
+        void onScale(float scale);
+        void onScaleEnd();
+    }
+    // UIE
+
 
     /**
      * Interface definition for a callback to be invoked when the user clicks on a marker.
@@ -888,6 +915,12 @@ public final class MapView extends FrameLayout {
 
             // User location
             setMyLocationEnabled(typedArray.getBoolean(R.styleable.MapView_my_location_enabled, false));
+
+            //UIE
+            setInhibitDoubleTap(typedArray.getBoolean(R.styleable.MapView_inhibit_double_tap, false));
+            setInhibitPinch(typedArray.getBoolean(R.styleable.MapView_inhibit_pinch, false));
+            setInhibitTap2Finger(typedArray.getBoolean(R.styleable.MapView_inhibit_tap2finger, false));
+            setInhibitQuickScale(typedArray.getBoolean(R.styleable.MapView_inhibit_quick_scale, false));
         } finally {
             typedArray.recycle();
         }
@@ -958,6 +991,12 @@ public final class MapView extends FrameLayout {
 
             //noinspection ResourceType
             setMyLocationTrackingMode(savedInstanceState.getInt(STATE_MY_LOCATION_TRACKING_MODE, MyLocationTracking.TRACKING_NONE));
+
+            // UIE
+            setInhibitDoubleTap(savedInstanceState.getBoolean(STATE_INHIBIT_DOUBLE_TAP));
+            setInhibitPinch(savedInstanceState.getBoolean(STATE_INHIBIT_PINCH));
+            setInhibitTap2Finger(savedInstanceState.getBoolean(STATE_INHIBIT_TAP2FINGER));;
+            setInhibitQuickScale(savedInstanceState.getBoolean(STATE_INHIBIT_QUICK_SCALE));;
         }
 
         // Force a check for an access token
@@ -1010,6 +1049,12 @@ public final class MapView extends FrameLayout {
         outState.putLong(STATE_DEFAULT_TRANSITION_DURATION, mNativeMapView.getDefaultTransitionDuration());
         outState.putBoolean(STATE_MY_LOCATION_ENABLED, isMyLocationEnabled());
         outState.putInt(STATE_MY_LOCATION_TRACKING_MODE, mUserLocationView.getMyLocationTrackingMode());
+        // UIE
+        outState.putBoolean(STATE_INHIBIT_DOUBLE_TAP, isDoubleTapInhibited());
+        outState.putBoolean(STATE_INHIBIT_PINCH, isPinchInhibited());
+        outState.putBoolean(STATE_INHIBIT_TAP2FINGER, isTap2FingerInhibited());
+        outState.putBoolean(STATE_INHIBIT_QUICK_SCALE, isQuickScaleInhibited());
+
 
         // Compass
         LayoutParams compassParams = (LayoutParams) mCompassView.getLayoutParams();
@@ -1545,6 +1590,58 @@ public final class MapView extends FrameLayout {
         this.mTiltEnabled = tiltEnabled;
     }
 
+    // UIE
+    @UiThread
+    public boolean isRotateCenter() {
+        return mRotateCenter;
+    }
+    @UiThread
+    public void setRotateCenter(boolean rotateCenter) {
+        this.mRotateCenter = rotateCenter;
+    }
+
+    @UiThread
+    public boolean isDoubleTapInhibited() {
+	return mInhibitDoubleTap;
+    }
+
+    @UiThread
+    public void setInhibitDoubleTap(boolean inhibited) {
+	mInhibitDoubleTap = inhibited;
+    }
+
+    @UiThread
+    public boolean isPinchInhibited() {
+        return mInhibitPinch;
+    }
+
+    @UiThread
+    public void setInhibitPinch(boolean inhibited) {
+        mInhibitPinch = inhibited;
+    }
+
+    @UiThread
+    public boolean isTap2FingerInhibited() {
+        return mInhibitTap2Finger;
+    }
+
+    @UiThread
+    public void setInhibitTap2Finger(boolean inhibited) {
+        mInhibitTap2Finger = inhibited;
+    }
+
+    @UiThread
+    public boolean isQuickScaleInhibited() {
+        return mInhibitQuickScale;
+    }
+
+    @UiThread
+    public void setInhibitQuickScale(boolean inhibited){
+        mInhibitQuickScale = inhibited;
+        mScaleGestureDetector.setQuickScaleEnabled(!mInhibitQuickScale);
+    }
+
+    // UIE
 
     //
     // Camera API
@@ -2881,14 +2978,27 @@ public final class MapView extends FrameLayout {
     public boolean onTouchEvent(@NonNull MotionEvent event) {
         // Check and ignore non touch or left clicks
 
-        if ((event.getButtonState() != 0) && (event.getButtonState() != MotionEvent.BUTTON_PRIMARY)) {
+        if ((event.getButtonState() != 0) && (event.getButtonState() != MotionEvent.BUTTON_PRIMARY
+                                              // UIE: In --touchpad,  BUTTON_TERTIARY sent... ;-(
+                                              && event.getButtonState() != MotionEvent.BUTTON_TERTIARY)) {
             return false;
         }
-
+	
+        mInhibitLongPress = false;
+	
         // Check two finger gestures first
         mRotateGestureDetector.onTouchEvent(event);
         mScaleGestureDetector.onTouchEvent(event);
         mShoveGestureDetector.onTouchEvent(event);
+
+        boolean retVal0 = false;
+        retVal0 = retVal0 || mRotateGestureDetector.isInProgress();
+        retVal0 = retVal0 || mScaleGestureDetector.isInProgress();
+        retVal0 = retVal0 || mShoveGestureDetector.isInProgress();
+
+        if (mRotateGestureDetector.isInProgress() || mScaleGestureDetector.isInProgress()) {
+            mInhibitLongPress = true;
+        }
 
         // Handle two finger tap
         switch (event.getActionMasked()) {
@@ -2915,14 +3025,21 @@ public final class MapView extends FrameLayout {
                         || mScaleGestureDetector.isInProgress()
                         || mShoveGestureDetector.isInProgress();
 
-/* UIE Workaround
-                if (mTwoTap && isTap && !inProgress) {
+/* UIE Workaround */
+                if (mTwoTap && isTap && !inProgress && !mInhibitTap2Finger) {
                     PointF focalPoint = TwoFingerGestureDetector.determineFocalPoint(event);
-                    zoom(false, focalPoint.x, focalPoint.y);
+                    if (isRotateCenter()) {
+                        zoom(false, getWidth() / 2, getHeight() / 2);
+                    } else {
+                        zoom(false, focalPoint.x, focalPoint.y);
+                    }
                     mTwoTap = false;
+
+                    mInhibitLongPress = true;
+
                     return true;
                 }
-*/
+/* end of UIE workaround  */
                 mTwoTap = false;
                 mNativeMapView.setGestureInProgress(false);
                 break;
@@ -2933,8 +3050,9 @@ public final class MapView extends FrameLayout {
                 break;
         }
 
-        boolean retVal = mGestureDetector.onTouchEvent(event);
-        return retVal || super.onTouchEvent(event);
+        boolean retVal = retVal0 || mGestureDetector.onTouchEvent(event);
+        retVal = retVal || super.onTouchEvent(event);
+        return retVal;
     }
 
     // This class handles one finger gestures
@@ -2950,9 +3068,9 @@ public final class MapView extends FrameLayout {
             }
 
             if (isMyLocationEnabled()) { // UIE work around.
-		setMyLocationTrackingMode(MyLocationTracking.TRACKING_NONE);
-		setMyBearingTrackingMode(MyBearingTracking.NONE);
-	    }
+                setMyLocationTrackingMode(MyLocationTracking.TRACKING_NONE);
+                setMyBearingTrackingMode(MyBearingTracking.NONE);
+            }
             return true;
         }
 
@@ -2961,6 +3079,10 @@ public final class MapView extends FrameLayout {
         public boolean onDoubleTapEvent(MotionEvent e) {
             if (!mZoomEnabled) {
                 return false;
+            }
+
+            if (mInhibitDoubleTap) {
+                return true;
             }
 
             switch (e.getAction()) {
@@ -2975,7 +3097,7 @@ public final class MapView extends FrameLayout {
                     }
 
                     // Single finger double tap
-                    if (mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE) {
+                    if (mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE && !isRotateCenter()) {
                         // Zoom in on gesture
                         zoom(true, e.getX(), e.getY());
                     } else {
@@ -3091,7 +3213,9 @@ public final class MapView extends FrameLayout {
         // Called for a long press
         @Override
         public void onLongPress(MotionEvent e) {
-            if (mOnMapLongClickListener != null && !mQuickZoom) {
+            if (mInhibitLongPress == true) { // UIE
+                mInhibitLongPress = false;
+            } else if (mOnMapLongClickListener != null && !mQuickZoom) {
                 LatLng point = fromScreenLocation(new PointF(e.getX(), e.getY()));
                 mOnMapLongClickListener.onMapLongClick(point);
             }
@@ -3104,6 +3228,9 @@ public final class MapView extends FrameLayout {
             if (!mScrollEnabled) {
                 return false;
             }
+
+            // UIE
+            setRotateCenter(false);
 
             // Fling the map
             float ease = 0.25f;
@@ -3134,6 +3261,13 @@ public final class MapView extends FrameLayout {
                 return false;
             }
 
+            // UIE
+            if (mInhibitScroll) {
+                mInhibitScroll = false; // One shot inhibitation.
+                return true;
+            }
+            setRotateCenter(false);
+
             // Cancel any animation
             mNativeMapView.cancelTransitions();
 
@@ -3161,7 +3295,17 @@ public final class MapView extends FrameLayout {
                 return false;
             }
 
+            if (isPinchInhibited()) {
+                return true;
+            }
+
             mBeginTime = detector.getEventTime();
+
+            // UIE
+            mInhibitScroll = true; // one shot inhibitation.
+            if (mOnScaleListener != null) {
+                mOnScaleListener.onScaleBegin();
+            }
             return true;
         }
 
@@ -3171,6 +3315,11 @@ public final class MapView extends FrameLayout {
             mBeginTime = 0;
             mScaleFactor = 1.0f;
             mZoomStarted = false;
+
+            // UIE
+            if (mOnScaleListener != null) {
+                mOnScaleListener.onScaleEnd();
+            }
         }
 
         // Called each time a finger moves
@@ -3179,6 +3328,10 @@ public final class MapView extends FrameLayout {
         public boolean onScale(ScaleGestureDetector detector) {
             if (!mZoomEnabled) {
                 return false;
+            }
+
+            if (isPinchInhibited()) {
+                return true;
             }
 
             // If scale is large enough ignore a tap
@@ -3206,13 +3359,19 @@ public final class MapView extends FrameLayout {
             mQuickZoom = !mTwoTap;
 
             // Scale the map
-            if (mScrollEnabled && !mQuickZoom && mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE) {
+            if (mScrollEnabled && !mQuickZoom && (mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE && !isRotateCenter())) {
                 // around gesture
                 mNativeMapView.scaleBy(detector.getScaleFactor(), detector.getFocusX() / mScreenDensity, detector.getFocusY() / mScreenDensity);
             } else {
                 // around center map
                 mNativeMapView.scaleBy(detector.getScaleFactor(), (getWidth() / 2) / mScreenDensity, (getHeight() / 2) / mScreenDensity);
             }
+
+            // UIE
+            if (mOnScaleListener != null) {
+                mOnScaleListener.onScale(detector.getScaleFactor());
+            }
+
             return true;
         }
     }
@@ -3286,7 +3445,7 @@ public final class MapView extends FrameLayout {
             bearing += detector.getRotationDegreesDelta();
 
             // Rotate the map
-            if (mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE) {
+            if (mUserLocationView.getMyLocationTrackingMode() == MyLocationTracking.TRACKING_NONE && !isRotateCenter()) {
                 // around gesture
                 mNativeMapView.setBearing(bearing,
                         detector.getFocusX() / mScreenDensity,
@@ -3840,6 +3999,12 @@ public final class MapView extends FrameLayout {
     public void setOnRotateListener(@Nullable OnRotateListener listener) {
         mOnRotateListener = listener;
     }
+
+    @UiThread
+    public void setOnScaleListener(@Nullable OnScaleListener listener) {
+        mOnScaleListener = listener;
+    }
+    //UIE
 
 
     /**

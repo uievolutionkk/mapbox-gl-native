@@ -86,5 +86,11 @@
             <enum name="invisible" value="0x4" />
             <enum name="gone" value="0x8" />
         </attr>
+
+        // UIE
+        <attr name="inhibit_double_tap" format="boolean" />
+        <attr name="inhibit_pinch" format="boolean" />
+        <attr name="inhibit_tap2finger" format="boolean" />
+        <attr name="inhibit_quick_scale" format="boolean" />
     </declare-styleable>
 </resources>

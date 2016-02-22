@@ -41,6 +41,11 @@
     <public name="attribution_margin_right" type="attr" />
     <public name="attribution_margin_bottom" type="attr" />
     <public name="attribution_visibility" type="attr" />
+    <!-- UIE -->
+    <public name="inhibit_double_tap" type="attr" />
+    <public name="inhibit_pinch" type="attr" />
+    <public name="inhibit_tap2finger" type="attr" />
+    <public name="inhibit_quick_scale" type="attr" />
 
     <public name="attribution_logo" type="drawable" />
     <public name="compass" type="drawable" />
